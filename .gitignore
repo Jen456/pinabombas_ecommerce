@@ -1,0 +1,32 @@
+﻿# WordPress core y dependencias (no versionar)
+/wordpress/wp-admin/
+/wordpress/wp-includes/
+/wordpress/wp-*.php
+/wordpress/index.php
+/wordpress/xmlrpc.php
+/wordpress/license.txt
+/wordpress/readme.html
+
+# Dumps y datos sensibles locales
+/db/*.sql
+/wordpress/wp-config.php
+
+# Uploads pesados (opcional: versiona solo si quieres las imagenes)
+# /wordpress/wp-content/uploads/
+
+# Cache / logs
+/wordpress/wp-content/cache/
+/wordpress/wp-content/upgrade/
+/wordpress/wp-content/debug.log
+
+# SO / editores
+.DS_Store
+Thumbs.db
+*.log
+
+# Docker
+/db/dbdata/
+
+# Entorno local
+.env
+

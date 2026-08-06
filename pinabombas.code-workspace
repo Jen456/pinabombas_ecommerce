@@ -1,0 +1,28 @@
+{
+  "folders": [
+    { "name": "Piña Bombas (raíz)", "path": "." },
+    { "name": "Código propio (mu-plugin)", "path": "wordpress/wp-content/mu-plugins" },
+    { "name": "Tema activo (Storefront)", "path": "wordpress/wp-content/themes/storefront" },
+    { "name": "Scripts", "path": "scripts" }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/wordpress/wp-admin": true,
+      "**/wordpress/wp-includes": true
+    },
+    "search.exclude": {
+      "**/wordpress/wp-admin": true,
+      "**/wordpress/wp-includes": true,
+      "**/db/*.sql": true
+    },
+    "files.associations": { "*.php": "php" }
+  },
+  "extensions": {
+    "recommendations": [
+      "bmewburn.vscode-intelephense-client",
+      "ms-azuretools.vscode-docker",
+      "wordpresstoolbox.wordpress-toolbox",
+      "editorconfig.editorconfig"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+﻿services:
+  db:
+    container_name: pinabombas_local_db
+
+  wordpress:
+    container_name: pinabombas_local_wp
+    ports: !override
+      - "8081:80"
