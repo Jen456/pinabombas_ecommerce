@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Piña Bombas - Slider y refinamiento visual
  * Description: Banner administrable y portada comercial para Storefront y WooCommerce.
- * Version: 2.2.0
+ * Version: 2.2.1
  */
 if (!defined('ABSPATH')) exit;
 
@@ -75,10 +75,10 @@ add_action('customize_register', function ($customizer) {
 
 add_action('wp_enqueue_scripts', function () {
     $css = __DIR__ . '/pinabombas-slider-v2.css';
-    wp_enqueue_style('pinabombas-slider-v2', plugins_url('pinabombas-slider-v2.css', __FILE__), array('pinabombas-frontend'), file_exists($css) ? (string) filemtime($css) : '2.2.0');
+    wp_enqueue_style('pinabombas-slider-v2', plugins_url('pinabombas-slider-v2.css', __FILE__), array('pinabombas-frontend'), file_exists($css) ? (string) filemtime($css) : '2.2.1');
     if (is_front_page()) {
         $js = __DIR__ . '/pinabombas-slider-v2.js';
-        wp_enqueue_script('pinabombas-slider-v2', plugins_url('pinabombas-slider-v2.js', __FILE__), array(), file_exists($js) ? (string) filemtime($js) : '2.2.0', true);
+        wp_enqueue_script('pinabombas-slider-v2', plugins_url('pinabombas-slider-v2.js', __FILE__), array(), file_exists($js) ? (string) filemtime($js) : '2.2.1', true);
     }
 }, 80);
 
@@ -99,7 +99,11 @@ add_action('storefront_before_content', function () {
                     <div class="pbv2-slider__content">
                         <div class="pbv2-slider__copy">
                             <p class="pb-eyebrow"><span aria-hidden="true"></span><?php echo esc_html($slide['eyebrow']); ?></p>
-                            <?php if ($active) : ?><h1><?php else : ?><h2><?php endif; ?>><?php echo esc_html($slide['title']); ?><?php if ($active) : ?></h1><?php else : ?></h2><?php endif; ?>
+                            <?php if ($active) : ?>
+                                <h1><?php echo esc_html($slide['title']); ?></h1>
+                            <?php else : ?>
+                                <h2><?php echo esc_html($slide['title']); ?></h2>
+                            <?php endif; ?>
                             <p class="pbv2-slider__description"><?php echo esc_html($slide['text']); ?></p>
                             <div class="pbv2-slider__actions">
                                 <a class="button pbv2-slider__primary" href="<?php echo esc_url($whatsapp); ?>" target="_blank" rel="nofollow noopener">Cotizar por WhatsApp</a>
