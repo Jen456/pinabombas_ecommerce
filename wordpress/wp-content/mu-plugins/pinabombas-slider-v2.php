@@ -1,34 +1,33 @@
 <?php
 /**
  * Plugin Name: Piña Bombas - Slider y refinamiento visual
- * Description: Banner administrable y mejoras visuales para Storefront y WooCommerce.
- * Version: 2.1.0
+ * Description: Banner administrable y portada comercial para Storefront y WooCommerce.
+ * Version: 2.2.0
  */
 if (!defined('ABSPATH')) exit;
 
 function pbv2_slider_defaults() {
     $image = plugins_url('pinabombas-hero-engineering-motion.png', __FILE__);
-
     return array(
         array(
             'enabled' => true,
-            'eyebrow' => 'EXPERTOS EN SISTEMAS DE COMBUSTIBLE',
-            'title'   => 'Bombas de combustible y piñas para autos',
-            'text'    => 'Venta, diagnóstico y reparación con atención técnica especializada. Revisamos compatibilidad por marca, modelo, año, motor y referencia antes de cotizar.',
+            'eyebrow' => 'ESPECIALISTAS EN SISTEMAS DE COMBUSTIBLE',
+            'title'   => 'Bombas de combustible para todo tipo de vehículos',
+            'text'    => 'Bombas, piñas, filtros, prefiltros y reguladores de presión. Confirmamos compatibilidad por marca, modelo, año, motor y referencia antes de cotizar.',
             'image'   => $image,
         ),
         array(
             'enabled' => false,
             'eyebrow' => 'DIAGNÓSTICO Y REPARACIÓN ESPECIALIZADA',
-            'title'   => 'Recupera el sistema de combustible de tu vehículo',
-            'text'    => 'Diagnóstico, reparación y adaptación de componentes con respaldo técnico especializado.',
+            'title'   => '¿Tu vehículo falla al encender o pierde potencia?',
+            'text'    => 'Revisamos presión, alimentación, conectores y sistema de combustible para identificar la pieza correcta.',
             'image'   => $image,
         ),
         array(
             'enabled' => false,
             'eyebrow' => 'COMPATIBILIDAD ANTES DE COMPRAR',
-            'title'   => 'Envíanos marca, modelo, año y referencia',
-            'text'    => 'Confirmamos la pieza correcta, disponibilidad y precio para evitar compras equivocadas.',
+            'title'   => 'Envíanos los datos de tu vehículo y evita comprar mal',
+            'text'    => 'Comparte marca, modelo, año, motor y foto de la pieza. Te ayudamos a confirmar disponibilidad y referencia.',
             'image'   => $image,
         ),
     );
@@ -36,12 +35,9 @@ function pbv2_slider_defaults() {
 
 function pbv2_get_slides() {
     $slides = array();
-
     foreach (pbv2_slider_defaults() as $index => $default) {
         $n = $index + 1;
-        $enabled = (bool) get_theme_mod("pbv2_slide_{$n}_enabled", $default['enabled']);
-        if (!$enabled) continue;
-
+        if (!(bool) get_theme_mod("pbv2_slide_{$n}_enabled", $default['enabled'])) continue;
         $slides[] = array(
             'eyebrow' => get_theme_mod("pbv2_slide_{$n}_eyebrow", $default['eyebrow']),
             'title'   => get_theme_mod("pbv2_slide_{$n}_title", $default['title']),
@@ -49,141 +45,70 @@ function pbv2_get_slides() {
             'image'   => get_theme_mod("pbv2_slide_{$n}_image", $default['image']) ?: $default['image'],
         );
     }
-
     return apply_filters('pbv2_slider_slides', $slides);
 }
 
 add_action('customize_register', function ($customizer) {
     $customizer->add_section('pbv2_slider', array(
-        'title'       => 'Banner principal',
-        'description' => 'Edita el banner desde WordPress. Activa más diapositivas únicamente cuando tengan imágenes diferentes.',
-        'priority'    => 35,
+        'title' => 'Banner principal',
+        'description' => 'Edita el banner desde WordPress. Activa más diapositivas cuando tengas imágenes diferentes.',
+        'priority' => 35,
     ));
 
     foreach (pbv2_slider_defaults() as $index => $default) {
         $n = $index + 1;
+        $customizer->add_setting("pbv2_slide_{$n}_enabled", array('default' => $default['enabled'], 'sanitize_callback' => 'wp_validate_boolean'));
+        $customizer->add_control("pbv2_slide_{$n}_enabled", array('label' => "Diapositiva {$n}: mostrar", 'section' => 'pbv2_slider', 'type' => 'checkbox'));
 
-        $customizer->add_setting("pbv2_slide_{$n}_enabled", array(
-            'default'           => $default['enabled'],
-            'sanitize_callback' => 'wp_validate_boolean',
-        ));
-        $customizer->add_control("pbv2_slide_{$n}_enabled", array(
-            'label'   => "Diapositiva {$n}: mostrar",
-            'section' => 'pbv2_slider',
-            'type'    => 'checkbox',
-        ));
-
-        $customizer->add_setting("pbv2_slide_{$n}_image", array(
-            'default'           => $default['image'],
-            'sanitize_callback' => 'esc_url_raw',
-        ));
-        $customizer->add_control(new WP_Customize_Image_Control(
-            $customizer,
-            "pbv2_slide_{$n}_image",
-            array(
-                'label'   => "Diapositiva {$n}: imagen",
-                'section' => 'pbv2_slider',
-            )
-        ));
+        $customizer->add_setting("pbv2_slide_{$n}_image", array('default' => $default['image'], 'sanitize_callback' => 'esc_url_raw'));
+        $customizer->add_control(new WP_Customize_Image_Control($customizer, "pbv2_slide_{$n}_image", array('label' => "Diapositiva {$n}: imagen", 'section' => 'pbv2_slider')));
 
         foreach (array('eyebrow' => 'Antetítulo', 'title' => 'Título') as $key => $label) {
-            $customizer->add_setting("pbv2_slide_{$n}_{$key}", array(
-                'default'           => $default[$key],
-                'sanitize_callback' => 'sanitize_text_field',
-            ));
-            $customizer->add_control("pbv2_slide_{$n}_{$key}", array(
-                'label'   => "Diapositiva {$n}: {$label}",
-                'section' => 'pbv2_slider',
-                'type'    => 'text',
-            ));
+            $customizer->add_setting("pbv2_slide_{$n}_{$key}", array('default' => $default[$key], 'sanitize_callback' => 'sanitize_text_field'));
+            $customizer->add_control("pbv2_slide_{$n}_{$key}", array('label' => "Diapositiva {$n}: {$label}", 'section' => 'pbv2_slider', 'type' => 'text'));
         }
 
-        $customizer->add_setting("pbv2_slide_{$n}_text", array(
-            'default'           => $default['text'],
-            'sanitize_callback' => 'sanitize_textarea_field',
-        ));
-        $customizer->add_control("pbv2_slide_{$n}_text", array(
-            'label'   => "Diapositiva {$n}: descripción",
-            'section' => 'pbv2_slider',
-            'type'    => 'textarea',
-        ));
+        $customizer->add_setting("pbv2_slide_{$n}_text", array('default' => $default['text'], 'sanitize_callback' => 'sanitize_textarea_field'));
+        $customizer->add_control("pbv2_slide_{$n}_text", array('label' => "Diapositiva {$n}: descripción", 'section' => 'pbv2_slider', 'type' => 'textarea'));
     }
 });
 
 add_action('wp_enqueue_scripts', function () {
     $css = __DIR__ . '/pinabombas-slider-v2.css';
-    wp_enqueue_style(
-        'pinabombas-slider-v2',
-        plugins_url('pinabombas-slider-v2.css', __FILE__),
-        array('pinabombas-frontend'),
-        file_exists($css) ? (string) filemtime($css) : '2.1.0'
-    );
-
+    wp_enqueue_style('pinabombas-slider-v2', plugins_url('pinabombas-slider-v2.css', __FILE__), array('pinabombas-frontend'), file_exists($css) ? (string) filemtime($css) : '2.2.0');
     if (is_front_page()) {
         $js = __DIR__ . '/pinabombas-slider-v2.js';
-        wp_enqueue_script(
-            'pinabombas-slider-v2',
-            plugins_url('pinabombas-slider-v2.js', __FILE__),
-            array(),
-            file_exists($js) ? (string) filemtime($js) : '2.1.0',
-            true
-        );
+        wp_enqueue_script('pinabombas-slider-v2', plugins_url('pinabombas-slider-v2.js', __FILE__), array(), file_exists($js) ? (string) filemtime($js) : '2.2.0', true);
     }
 }, 80);
 
 add_action('storefront_before_content', function () {
     if (!is_front_page()) return;
-
     $slides = pbv2_get_slides();
     if (!$slides) return;
 
-    $shop = function_exists('wc_get_page_permalink')
-        ? wc_get_page_permalink('shop')
-        : home_url('/shop/');
-
-    $whatsapp = function_exists('pb_wa_link')
-        ? pb_wa_link(null, 'Hola, quiero cotizar una bomba o piña de combustible. Tengo marca, modelo, año y referencia del vehículo.')
-        : '#';
+    $shop = function_exists('wc_get_page_permalink') ? wc_get_page_permalink('shop') : home_url('/shop/');
+    $whatsapp = function_exists('pb_wa_link') ? pb_wa_link(null, 'Hola, quiero cotizar una bomba o piña de combustible. Mi vehículo es: marca, modelo, año y motor.') : '#';
     ?>
-    <section class="pbv2-slider" data-pbv2-slider data-delay="7000" aria-roledescription="carousel" aria-label="Servicios destacados de Piña Bombas">
+    <section class="pbv2-slider" data-pbv2-slider data-delay="7000" aria-roledescription="carousel" aria-label="Piña Bombas de Combustible">
         <div class="pbv2-slider__viewport">
             <?php foreach ($slides as $index => $slide) : $active = $index === 0; ?>
                 <article class="pbv2-slider__slide pbv2-slider__slide--<?php echo esc_attr((string) ($index + 1)); ?><?php echo $active ? ' is-active' : ''; ?>" data-pbv2-slide aria-hidden="<?php echo $active ? 'false' : 'true'; ?>">
-                    <img
-                        class="pbv2-slider__image"
-                        src="<?php echo esc_url($slide['image']); ?>"
-                        alt="<?php echo esc_attr($slide['title']); ?>"
-                        loading="<?php echo $active ? 'eager' : 'lazy'; ?>"
-                        decoding="async"
-                        <?php echo $active ? 'fetchpriority="high"' : ''; ?>
-                    >
+                    <img class="pbv2-slider__image" src="<?php echo esc_url($slide['image']); ?>" alt="<?php echo esc_attr($slide['title']); ?>" loading="<?php echo $active ? 'eager' : 'lazy'; ?>" decoding="async" <?php echo $active ? 'fetchpriority="high"' : ''; ?>>
                     <span class="pbv2-slider__overlay" aria-hidden="true"></span>
-
                     <div class="pbv2-slider__content">
                         <div class="pbv2-slider__copy">
                             <p class="pb-eyebrow"><span aria-hidden="true"></span><?php echo esc_html($slide['eyebrow']); ?></p>
-
-                            <?php if ($active) : ?><h1><?php else : ?><h2><?php endif; ?>
-                                <?php echo esc_html($slide['title']); ?>
-                            <?php if ($active) : ?></h1><?php else : ?></h2><?php endif; ?>
-
+                            <?php if ($active) : ?><h1><?php else : ?><h2><?php endif; ?>><?php echo esc_html($slide['title']); ?><?php if ($active) : ?></h1><?php else : ?></h2><?php endif; ?>
                             <p class="pbv2-slider__description"><?php echo esc_html($slide['text']); ?></p>
-
                             <div class="pbv2-slider__actions">
-                                <a class="button pbv2-slider__primary" href="<?php echo esc_url($shop); ?>">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.2 9.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L20 7H7M10 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"/></svg>
-                                    <span>Ver catálogo</span>
-                                </a>
-                                <a class="button pbv2-slider__secondary" href="<?php echo esc_url($whatsapp); ?>" target="_blank" rel="nofollow noopener">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a8 8 0 0 1-11.8 7L4 20l1.5-4A8 8 0 1 1 20 11.5Z"/><path d="M9 9.2c.6 2 1.8 3.2 3.8 3.8"/></svg>
-                                    <span>Cotizar por WhatsApp</span>
-                                </a>
+                                <a class="button pbv2-slider__primary" href="<?php echo esc_url($whatsapp); ?>" target="_blank" rel="nofollow noopener">Cotizar por WhatsApp</a>
+                                <a class="button pbv2-slider__secondary" href="<?php echo esc_url($shop); ?>">Ver catálogo</a>
                             </div>
-
                             <ul class="pbv2-slider__trust" aria-label="Ventajas principales">
                                 <li>Compatibilidad verificada</li>
-                                <li>Asesoría técnica</li>
-                                <li>Stock multimarca</li>
+                                <li>Atención especializada</li>
+                                <li>Bombas y repuestos multimarca</li>
                             </ul>
                         </div>
                     </div>
@@ -194,38 +119,85 @@ add_action('storefront_before_content', function () {
                 <div class="pbv2-slider__controls" aria-label="Controles del slider">
                     <button type="button" data-pbv2-prev aria-label="Diapositiva anterior">‹</button>
                     <div class="pbv2-slider__dots" role="tablist" aria-label="Elegir diapositiva">
-                        <?php foreach ($slides as $index => $slide) : ?>
-                            <button type="button" data-pbv2-dot role="tab" aria-label="Ir a diapositiva <?php echo esc_attr((string) ($index + 1)); ?>" aria-selected="<?php echo $index === 0 ? 'true' : 'false'; ?>" class="<?php echo $index === 0 ? 'is-active' : ''; ?>"></button>
-                        <?php endforeach; ?>
+                        <?php foreach ($slides as $index => $slide) : ?><button type="button" data-pbv2-dot role="tab" aria-label="Ir a diapositiva <?php echo esc_attr((string) ($index + 1)); ?>" aria-selected="<?php echo $index === 0 ? 'true' : 'false'; ?>" class="<?php echo $index === 0 ? 'is-active' : ''; ?>"></button><?php endforeach; ?>
                     </div>
                     <button type="button" data-pbv2-toggle aria-label="Pausar slider" aria-pressed="false">Ⅱ</button>
                     <button type="button" data-pbv2-next aria-label="Siguiente diapositiva">›</button>
                 </div>
             <?php endif; ?>
         </div>
+    </section>
 
-        <div class="pbv2-services" aria-label="Servicios principales">
-            <div class="pbv2-services__inner">
-                <article>
-                    <span class="pbv2-services__icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.8 2.7 8 7 10 4.3-2 7-5.2 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
-                    </span>
-                    <div><strong>01. Venta de bombas</strong><p>Bombas completas, piñas y repuestos según marca y modelo.</p></div>
-                </article>
-                <article>
-                    <span class="pbv2-services__icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v7"/><path d="M15 3v4h4M6 3v18h7"/><circle cx="17" cy="17" r="3"/><path d="m19.2 19.2 2 2"/></svg>
-                    </span>
-                    <div><strong>02. Diagnóstico técnico</strong><p>Revisión de síntomas, presión, conectores y compatibilidad.</p></div>
-                </article>
-                <article>
-                    <span class="pbv2-services__icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24"><path d="m14 7 3-3 3 3-3 3M4 20l7-7M8 4l12 12M4 8l4-4"/><path d="m14 17 3 3 3-3-3-3"/></svg>
-                    </span>
-                    <div><strong>03. Reparación</strong><p>Soluciones con respaldo para sistemas de combustible.</p></div>
-                </article>
+    <section class="pbv2-benefits" aria-label="Por qué elegir Piña Bombas">
+        <div class="pbv2-container pbv2-benefits__grid">
+            <article><strong>Compatibilidad antes de comprar</strong><span>Revisamos marca, modelo, año, motor y referencia.</span></article>
+            <article><strong>Atención técnica especializada</strong><span>Te ayudamos a identificar la pieza adecuada.</span></article>
+            <article><strong>Variedad multimarca</strong><span>Opciones para vehículos livianos de distintas marcas.</span></article>
+            <article><strong>Cotización directa</strong><span>Respuesta rápida por WhatsApp al 099 101 5866.</span></article>
+        </div>
+    </section>
+
+    <section class="pbv2-home-section pbv2-categories">
+        <div class="pbv2-container">
+            <p class="pbv2-kicker">ENCUENTRA LO QUE NECESITAS</p>
+            <h2>Productos para el sistema de combustible de tu vehículo</h2>
+            <p class="pbv2-lead">No compres a ciegas. Dinos qué vehículo tienes y te ayudamos a buscar la referencia correcta.</p>
+            <div class="pbv2-category-grid">
+                <a href="<?php echo esc_url($shop); ?>"><strong>Bombas de combustible</strong><span>Bombas completas y repuestos por aplicación.</span><b>Ver productos →</b></a>
+                <a href="<?php echo esc_url($shop); ?>"><strong>Filtros</strong><span>Filtración para proteger el sistema de combustible.</span><b>Ver productos →</b></a>
+                <a href="<?php echo esc_url($shop); ?>"><strong>Prefiltros</strong><span>Mallas y elementos de protección para bomba.</span><b>Ver productos →</b></a>
+                <a href="<?php echo esc_url($shop); ?>"><strong>Reguladores de presión</strong><span>Control de presión para distintos sistemas.</span><b>Ver productos →</b></a>
+            </div>
+        </div>
+    </section>
+
+    <section class="pbv2-home-section pbv2-fitment">
+        <div class="pbv2-container pbv2-fitment__grid">
+            <div>
+                <p class="pbv2-kicker">TE AYUDAMOS A ELEGIR</p>
+                <h2>Envíanos los datos de tu vehículo antes de comprar</h2>
+                <p>Para confirmar compatibilidad necesitamos marca, modelo, año, motor y, si la tienes, foto o código de la pieza.</p>
+                <a class="button pbv2-red-button" href="<?php echo esc_url($whatsapp); ?>" target="_blank" rel="nofollow noopener">Enviar datos por WhatsApp</a>
+            </div>
+            <ol>
+                <li><b>1</b><span><strong>Identifica tu vehículo</strong>Marca, modelo, año y motor.</span></li>
+                <li><b>2</b><span><strong>Envíanos una foto</strong>Pieza, conector o referencia si está disponible.</span></li>
+                <li><b>3</b><span><strong>Recibe la cotización</strong>Confirmamos opción, disponibilidad y precio.</span></li>
+            </ol>
+        </div>
+    </section>
+
+    <section class="pbv2-home-section pbv2-brands">
+        <div class="pbv2-container">
+            <p class="pbv2-kicker">MULTIMARCA</p>
+            <h2>Trabajamos con aplicaciones para distintas marcas</h2>
+            <div class="pbv2-brand-list" aria-label="Marcas de vehículos">
+                <span>Chevrolet</span><span>Toyota</span><span>Kia</span><span>Hyundai</span><span>Nissan</span><span>Mazda</span><span>Suzuki</span><span>Ford</span><span>Chery</span><span>Peugeot</span><span>Renault</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="pbv2-home-section pbv2-contact">
+        <div class="pbv2-container pbv2-contact__grid">
+            <div>
+                <p class="pbv2-kicker">CONTACTO DIRECTO</p>
+                <h2>Piña Bombas de Combustible</h2>
+                <p><strong>WhatsApp:</strong> +593 99 101 5866</p>
+                <p><strong>Dirección:</strong> Aguirre 1628 y Av. del Ejército (esquina), Guayaquil.</p>
+                <p><strong>Sitio:</strong> pinabombascombustible.ec</p>
+            </div>
+            <div class="pbv2-socials" aria-label="Redes sociales">
+                <a href="https://www.facebook.com/bombasdecombustiblec" target="_blank" rel="noopener">Facebook <span>@bombasdecombustiblec</span></a>
+                <a href="https://www.instagram.com/pinabombascombustible.ec/" target="_blank" rel="noopener">Instagram <span>@pinabombascombustible.ec</span></a>
+                <a href="https://www.tiktok.com/@pinabombascombustible.ec" target="_blank" rel="noopener">TikTok <span>@pinabombascombustible.ec</span></a>
+                <a href="<?php echo esc_url($whatsapp); ?>" target="_blank" rel="nofollow noopener">WhatsApp <span>099 101 5866</span></a>
             </div>
         </div>
     </section>
     <?php
 }, 3);
+
+add_action('wp', function () {
+    if (!is_front_page()) return;
+    remove_action('storefront_page', 'storefront_page_content', 20);
+});
